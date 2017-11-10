@@ -37,12 +37,13 @@ let debug_window_size(sender : System.Drawing.Size) =
         //| _ -> ignore()
         
 
-let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, e : EventArgs) = 
+
+let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, size: String, e : EventArgs) = 
         let folderBrowser = new FolderBrowserDialog()
         let browserResult = folderBrowser.ShowDialog()
-        let browserMatch = if browserResult = DialogResult.OK then tbtBox.Text <- folderBrowser.SelectedPath
-        Array.iter ( fun a -> lstBox.Items.Add(a) ) Directory.GetFiles(tbtBox.Text)
-        |>ignore
+        //let browserMatch = if browserResult = DialogResult.OK then tbtBox.Text <- folderBrowser.SelectedPath
+        //Array.iter ( fun a -> lstBox.Items.Add(a) ) Directory.GetFiles(tbtBox.Text)
+        //|>ignore
 
         //Array.iter (fun x -> printf "%d " x)
         //|>lstBox.Items.AddRange
@@ -59,7 +60,11 @@ let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, e : EventArgs) =
     //| _ -> "z" 
     //| 1 -> "a"
     //| 2 -> "b" 
-    
+ 
+
+let randomizeButton_Click(tbxDirectory : TextBox, tbxAmount : TextBox, e : EventArgs) =
+    ignore
+
 
 
 let playButton_Click (sender : TextBox, e : EventArgs) = 
@@ -115,13 +120,14 @@ let main (argv :string[]) =
     let mainFileExit = new MenuItem("Exit")
 
     let buttonPanel = new Panel()
-    let tbDirectory = new TextBox()
+    let tbxDirectory = new TextBox()
     let btnDirectory = new Button()
     let btnRandomize = new Button()
     let btnPlay = new Button()
     let cbxMusicBox = new CheckBox()
     let cbxVideoBox = new CheckBox()
-    
+    let lblAmount = new Label()
+    let tbxAmount = new TextBox()
 
     let mediaList = new ListBox()
 
@@ -142,14 +148,7 @@ let main (argv :string[]) =
     mainMenu.MenuItems.AddRange( [| mainFile |] )
     form.Menu <- mainMenu
 
-    // media list box
-    mediaList.Dock <- System.Windows.Forms.DockStyle.Fill
-    mediaList.FormattingEnabled <- true
-    mediaList.ItemHeight <- 25
-    mediaList.Location <- new System.Drawing.Point(538, 0)
-    mediaList.Name <- "MediaList";
-    mediaList.Size <- new System.Drawing.Size(592, 729)
-    mediaList.TabIndex <- 1
+    
      
 
     buttonPanel.Name <- "buttonPanel"
@@ -162,35 +161,37 @@ let main (argv :string[]) =
 
 
     // Directory Textbox
-    tbDirectory.Location <- new System.Drawing.Point(26, 35)
-    tbDirectory.Name <- "Directory"
-    tbDirectory.Size <- new System.Drawing.Size(250, 31)
-    tbDirectory.TabIndex <- 0
+    tbxDirectory.Location <- new System.Drawing.Point(26, 35)
+    tbxDirectory.Name <- "Directory"
+    tbxDirectory.Size <- new System.Drawing.Size(250, 31)
+    tbxDirectory.TabIndex <- 0
 
     // directory button
     btnDirectory.Text <- "Directory"
     btnDirectory.Location <- new System.Drawing.Point(90, 80)
     btnDirectory.Size <- new System.Drawing.Size(120, 30)
     btnDirectory.TabIndex <- 1 //??
-    btnDirectory.Click.AddHandler(new System.EventHandler (fun _ e -> directoryButton_Click(tbDirectory, mediaList, e))) // change to the real function
+    btnDirectory.Click.AddHandler(new System.EventHandler (fun _ e -> directoryButton_Click(tbxDirectory, mediaList, tbxAmount.Text, e))) // change to the real function
 
     
     // Randomize
     btnRandomize.Location <- new System.Drawing.Point(90, 130)
     btnRandomize.Name <- "Randomize"
     btnRandomize.Size <- new System.Drawing.Size(120, 30)
-    btnRandomize.TabIndex <- 2
     btnRandomize.Text <- "Randomize"
     btnRandomize.UseVisualStyleBackColor <- true
+    btnRandomize.TabIndex <- 2
+    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory, tbxAmount.Text, e))) // change to the real function
+
 
     // Play Button
     btnPlay.Location <- new System.Drawing.Point(90, 180)
     btnPlay.Name <- "Play";
     btnPlay.Size <- new System.Drawing.Size(120, 30)
-    btnPlay.TabIndex <- 3;
     btnPlay.Text <- "Play";
     btnPlay.UseVisualStyleBackColor <- true;
-    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> playButton_Click(tbDirectory, e))) // change to the real function
+    btnPlay.TabIndex <- 3;
+    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> playButton_Click(tbxDirectory, e))) // change to the real function
 
     //// debug button
     //let debugButton = new Button()
@@ -200,29 +201,41 @@ let main (argv :string[]) =
     //form.KeyPress.AddHandler(new KeyPressEventHandler (fun f e -> debug_window_size_key_press(form.Size, e)))
     //form.KeyDown.AddHandler(new System.Windows.Forms.KeyEventHandler (fun s e -> debug_window_size_key_press(form.Size, e)))
 
+    // videoBox check box
+    cbxVideoBox.Location <- new System.Drawing.Point(200, 227)
+    cbxVideoBox.Name <- "videoBox"
+    cbxVideoBox.Size <- new System.Drawing.Size(100, 30)
+    cbxVideoBox.Text <- "Video"
+    cbxVideoBox.AutoSize <- true
+    cbxVideoBox.TabIndex <- 4
+
     // musicBox check box
-    cbxMusicBox.Location <- new System.Drawing.Point(25, 220)
+    cbxMusicBox.Location <- new System.Drawing.Point(200, 240)
     cbxMusicBox.Name <- "musicBox"
     cbxMusicBox.Size <- new System.Drawing.Size(100, 30)
     cbxMusicBox.Text <- "Music"
     cbxMusicBox.TabIndex <- 5
 
 
-    // videoBox check box
-    cbxVideoBox.Location <- new System.Drawing.Point(200, 227)
-    cbxVideoBox.Name <- "videoBox"
-    cbxVideoBox.TabIndex <- 4
-    cbxVideoBox.Size <- new System.Drawing.Size(100, 30)
-    cbxVideoBox.Text <- "Video"
-    cbxVideoBox.AutoSize <- true
-    
+    lblAmount.Text <- "Size of List"
+    lblAmount.TextAlign <- ContentAlignment.TopCenter
+    lblAmount.Size <- new System.Drawing.Size(50,50)
+    lblAmount.Location <- new System.Drawing.Point(20,230)
+    lblAmount.TabIndex <- 6
+
+    tbxAmount.Text <- "1"
+    tbxAmount.Location <-new System.Drawing.Point(lblAmount.Location.X + lblAmount.Size.Width + 5,233)
+    tbxAmount.Size <- new System.Drawing.Size(20, 90)
+    tbxAmount.TabIndex <- 7
    
-    buttonPanel.Controls.Add(tbDirectory)
+    buttonPanel.Controls.Add(tbxDirectory)
     buttonPanel.Controls.Add(btnDirectory)
     buttonPanel.Controls.Add(btnRandomize)
     buttonPanel.Controls.Add(btnPlay)
     buttonPanel.Controls.Add(cbxVideoBox)
     buttonPanel.Controls.Add(cbxMusicBox)
+    buttonPanel.Controls.Add(lblAmount)
+    buttonPanel.Controls.Add(tbxAmount)
     //buttonPanel.Controls.Add(debugButton)
 
     buttonPanel.ResumeLayout(false)
@@ -230,6 +243,15 @@ let main (argv :string[]) =
     form.ResumeLayout(false)
     form.AutoScaleMode <- System.Windows.Forms.AutoScaleMode.Font
 
+
+   // media list box
+    mediaList.Dock <- System.Windows.Forms.DockStyle.Fill
+    mediaList.FormattingEnabled <- true
+    mediaList.ItemHeight <- 25
+    mediaList.Location <- new System.Drawing.Point(538, 0)
+    mediaList.Name <- "MediaList";
+    mediaList.Size <- new System.Drawing.Size(592, 729)
+    mediaList.TabIndex <- 1
 
     // Background
     let Background = new Panel()
@@ -240,7 +262,7 @@ let main (argv :string[]) =
     Background.Location <- new System.Drawing.Point(0, 0);
     Background.Name <- "Background";
     Background.Size <- new System.Drawing.Size(2035, 1198);
-    //Background.TabIndex <- 3;
+    Background.TabIndex <- 0;
     Background.Controls.Add(mediaList)
     Background.Controls.Add(buttonPanel)
 
