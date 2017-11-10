@@ -3,6 +3,7 @@ open System.Windows.Forms
 open System.Drawing
 open System.IO
 open System.Diagnostics
+
 //open System.Media
 //open System.Windows.Forms.DataGridViewComboBoxCell
 
@@ -38,34 +39,42 @@ let debug_window_size(sender : System.Drawing.Size) =
         
 
 
-let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, size: String, e : EventArgs) = 
+let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, size: String, e : EventArgs) =
+        lstBox.Items.Clear()
         let folderBrowser = new FolderBrowserDialog()
         let browserResult = folderBrowser.ShowDialog()
-        //let browserMatch = if browserResult = DialogResult.OK then tbtBox.Text <- folderBrowser.SelectedPath
-        //Array.iter ( fun a -> lstBox.Items.Add(a) ) Directory.GetFiles(tbtBox.Text)
-        //|>ignore
+        let browserMatch = 
+            if browserResult = DialogResult.OK then 
+                tbtBox.Text <- folderBrowser.SelectedPath
+                let found_files_dir = new DirectoryInfo(tbtBox.Text)
+                let found_files = found_files_dir.GetFiles()
+                //Directory.GetFiles(tbtBox.Text)
+                
+                for i in found_files do
+                    lstBox.Items.Add(i) |>ignore
 
-        //Array.iter (fun x -> printf "%d " x)
-        //|>lstBox.Items.AddRange
+        lstBox.SelectedItem <- 0
 
-        if browserResult = DialogResult.OK then ignore()
-        //if folderBrowser.ShowDialog()  DialogResult.OK then
-        //    sender.Text = folderBrowser.SelectedPath
-        //|> ignore()
+       
+let numberCheck = System.Text.RegularExpressions.Regex("^[0-9]+$")    
+let strContainsOnlyNumbers (s:string) = numberCheck.IsMatch s
 
+let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: TextBox) rnd = 
+    let timer = new Timer()
+    timer.Start()
+    timer.Stop()
+    let rnd = System.Random(timer.Interval)
+    if strContainsOnlyNumbers(size.Text) = true then
+        let sizeInt = System.Int32.Parse(size.Text)
+        if sizeInt <= lstBox.Items.Count then
+            List.init sizeInt (fun _ -> rnd.Next(0,10))
+        else
+            List.init lstBox.Items.Count (fun _ -> rnd.Next(0,10))
 
-
-    //     let x = 
-    //match 1 with 
-    //| _ -> "z" 
-    //| 1 -> "a"
-    //| 2 -> "b" 
- 
-
-let randomizeButton_Click(tbxDirectory : TextBox, tbxAmount : TextBox, e : EventArgs) =
-    ignore
-
-
+let randomizeButton_Click(tbxDirectory : TextBox, lstBox: ListBox, size: TextBox, e : EventArgs) =
+      ignore()
+      //let randomNumbers = Randomizer(tbxDirectory,lstBox,size)
+      
 
 let playButton_Click (sender : TextBox, e : EventArgs) = 
     let dir = new DirectoryInfo(sender.Text)//new DirectoryInfo(@"D:\\Sammy\\anime\\Last week - watched\\Dragon Ball Super")
@@ -120,6 +129,8 @@ let main (argv :string[]) =
     let mainFileExit = new MenuItem("Exit")
 
     let buttonPanel = new Panel()
+    let listPanel = new Panel()
+
     let tbxDirectory = new TextBox()
     let btnDirectory = new Button()
     let btnRandomize = new Button()
@@ -159,15 +170,20 @@ let main (argv :string[]) =
     //buttonPanel.BackColor <- Color.Blue
     buttonPanel.Width <- form.Width/2 // trying to figure out size
 
+    listPanel.Dock <- System.Windows.Forms.DockStyle.Fill;
+    listPanel.Location <- new System.Drawing.Point(373, 0);
+    listPanel.Name <- "ListPanel";
+    listPanel.Size <- new System.Drawing.Size(608, 532);
+    listPanel.TabIndex <- 1;
 
     // Directory Textbox
     tbxDirectory.Location <- new System.Drawing.Point(26, 35)
-    tbxDirectory.Name <- "Directory"
+    tbxDirectory.Name <- "tbxDirectory"
     tbxDirectory.Size <- new System.Drawing.Size(250, 31)
     tbxDirectory.TabIndex <- 0
 
     // directory button
-    btnDirectory.Text <- "Directory"
+    btnDirectory.Text <- "btnDirectory"
     btnDirectory.Location <- new System.Drawing.Point(90, 80)
     btnDirectory.Size <- new System.Drawing.Size(120, 30)
     btnDirectory.TabIndex <- 1 //??
@@ -176,17 +192,17 @@ let main (argv :string[]) =
     
     // Randomize
     btnRandomize.Location <- new System.Drawing.Point(90, 130)
-    btnRandomize.Name <- "Randomize"
+    btnRandomize.Name <- "btnRandomize"
     btnRandomize.Size <- new System.Drawing.Size(120, 30)
     btnRandomize.Text <- "Randomize"
     btnRandomize.UseVisualStyleBackColor <- true
     btnRandomize.TabIndex <- 2
-    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory, tbxAmount.Text, e))) // change to the real function
+    //btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory, tbxAmount, e))) // change to the real function
 
 
     // Play Button
     btnPlay.Location <- new System.Drawing.Point(90, 180)
-    btnPlay.Name <- "Play";
+    btnPlay.Name <- "btnPlay";
     btnPlay.Size <- new System.Drawing.Size(120, 30)
     btnPlay.Text <- "Play";
     btnPlay.UseVisualStyleBackColor <- true;
@@ -203,7 +219,7 @@ let main (argv :string[]) =
 
     // videoBox check box
     cbxVideoBox.Location <- new System.Drawing.Point(200, 227)
-    cbxVideoBox.Name <- "videoBox"
+    cbxVideoBox.Name <- "chbxVideoBox"
     cbxVideoBox.Size <- new System.Drawing.Size(100, 30)
     cbxVideoBox.Text <- "Video"
     cbxVideoBox.AutoSize <- true
@@ -211,18 +227,20 @@ let main (argv :string[]) =
 
     // musicBox check box
     cbxMusicBox.Location <- new System.Drawing.Point(200, 240)
-    cbxMusicBox.Name <- "musicBox"
+    cbxMusicBox.Name <- "chbxMusicBox"
     cbxMusicBox.Size <- new System.Drawing.Size(100, 30)
     cbxMusicBox.Text <- "Music"
     cbxMusicBox.TabIndex <- 5
 
-
+    // size of list label
     lblAmount.Text <- "Size of List"
     lblAmount.TextAlign <- ContentAlignment.TopCenter
     lblAmount.Size <- new System.Drawing.Size(50,50)
     lblAmount.Location <- new System.Drawing.Point(20,230)
     lblAmount.TabIndex <- 6
 
+    // size of list box
+    tbxAmount.Name <- "tbxAmount"
     tbxAmount.Text <- "1"
     tbxAmount.Location <-new System.Drawing.Point(lblAmount.Location.X + lblAmount.Size.Width + 5,233)
     tbxAmount.Size <- new System.Drawing.Size(20, 90)
@@ -245,6 +263,7 @@ let main (argv :string[]) =
 
 
    // media list box
+    mediaList.Name <- "MediaList"
     mediaList.Dock <- System.Windows.Forms.DockStyle.Fill
     mediaList.FormattingEnabled <- true
     mediaList.ItemHeight <- 25
@@ -253,6 +272,8 @@ let main (argv :string[]) =
     mediaList.Size <- new System.Drawing.Size(592, 729)
     mediaList.TabIndex <- 1
 
+    listPanel.Controls.Add(mediaList)
+    
     // Background
     let Background = new Panel()
     Background.Anchor <- (System.Windows.Forms.AnchorStyles.Top ||| System.Windows.Forms.AnchorStyles.Bottom ||| (System.Windows.Forms.AnchorStyles.Left ||| System.Windows.Forms.AnchorStyles.Right))
@@ -263,12 +284,10 @@ let main (argv :string[]) =
     Background.Name <- "Background";
     Background.Size <- new System.Drawing.Size(2035, 1198);
     Background.TabIndex <- 0;
-    Background.Controls.Add(mediaList)
-    Background.Controls.Add(buttonPanel)
 
     Background.Controls.AddRange([| 
                                     (buttonPanel)
-                                    (mediaList)
+                                    (listPanel)
                                 |])
 
     Background.Focus() |> ignore
