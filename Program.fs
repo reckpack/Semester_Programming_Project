@@ -77,7 +77,7 @@ let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String) = //,  [<
               //let Shuffle2 = found_files |> Seq.toArray()
               for i in found_files do
                   lstBox.Items.Add(i) |>ignore
-                  spoopyGhostMediaList.Add(i) |>ignore
+                  spoopyGhostMediaList.Add(i.FullName) |>ignore
               
     | false -> MessageBox.Show("List Size is Invalid") |> ignore        
     lstBox.SelectedItem <- 0
@@ -136,14 +136,13 @@ let playButton_Click (lstBox: ListBox, e : EventArgs) =
 
          //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
         //let a = Array.ConvertAll(found_files, Converter(string) )
-        let f = spoopyGhostMediaList.ToArray()
-        let arr = seq { for i in spoopyGhostMediaList -> i}
-        //let b = Array.ConvertAll(f, Converter(FileInfo(f) ))
+        let f = spoopyGhostMediaList
+        let arr = seq { for i in 0..spoopyGhostMediaList.Count -> spoopyGhostMediaList.Item i}
         //let files1 = 
         //    Seq.toArray(arr)
         //    |>Array.map(fun s -> "\"\"\"" + (s.FullName) )
         //    |>Array.map(fun s -> s + "\"\"\"")
-        let files1 = f
+        let files1 = arr
         let files2 = files1 |> Seq.map(fun s -> "\"\"\"" + s)
         let files3 = files2 |> Seq.map(fun s -> s + "\"\"\"")
 
