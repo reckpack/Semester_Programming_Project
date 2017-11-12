@@ -136,14 +136,14 @@ let playButton_Click (lstBox: ListBox, e : EventArgs) =
 
          //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
         //let a = Array.ConvertAll(found_files, Converter(string) )
-        let f = spoopyGhostMediaList
+        //let f = spoopyGhostMediaList
         let arr = seq { for i in 0..spoopyGhostMediaList.Count -> spoopyGhostMediaList.Item i}
         //let files1 = 
         //    Seq.toArray(arr)
         //    |>Array.map(fun s -> "\"\"\"" + (s.FullName) )
         //    |>Array.map(fun s -> s + "\"\"\"")
         let files1 = arr
-        let files2 = files1 |> Seq.map(fun s -> "\"\"\"" + s)
+        let files2 = files1 |> Seq.map(fun s -> "\"\"\"" + (s.ToString()))
         let files3 = files2 |> Seq.map(fun s -> s + "\"\"\"")
 
         let filesFinal = """/play /add """ + String.Join( " ", files3)
