@@ -3,11 +3,19 @@ open System.Windows.Forms
 open System.Drawing
 open System.IO
 open System.Diagnostics
+open System.Collections
+
+//open System.Windows.Forms.CheckedListBox
+
+//open System.Windows.Forms.CheckedListBox
 
 //open System.Media
 //open System.Windows.Forms.DataGridViewComboBoxCell
 
-//System.Diagnostics.Process.Start("MyCommand", "arg1, arg2, arg3");
+let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+
+// REALLY BAD STUFF BUT I KINDA RUN OUT OF IDEAS SO SUE ME
+let spoopyGhostMediaList = new ArrayList()
 
 
 let debug_window_size_key_press(f : System.Drawing.Size, e : KeyEventArgs) = 
@@ -20,77 +28,127 @@ let debug_window_size_key_press(f : System.Drawing.Size, e : KeyEventArgs) =
 // Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
 
-
-// main form
-
-
 let mainFileExit_Click(sender : System.Object, e : EventArgs) = 
         exit 0 |> ignore
 
-
-
 //let stuffToDoWhenKeyPressed s (e : KeyEventArgs) = 
-let debug_window_size(sender : System.Drawing.Size) = 
+let debug_window_size(sender : System.Drawing.Size, lstBox : ListBox) = 
         Console.Clear()
         Console.WriteLine("Form Width: {0}\nForm Height: {1}",sender.Width, sender.Height)
+        Console.WriteLine(lstBox.Items)
+        //for i in lstBox.Items do
+        //   Console.WriteLine(i)
+
         //match e with
         //| e when Char.ToLower e.KeyChar = 'q' -> Console.WriteLine("Form Width: {0}\nForm Height: {1}",sender.Width, sender.Height)
         //| _ -> ignore()
         
-
-
-let directoryButton_Click (tbtBox : TextBox, lstBox: ListBox, size: String, e : EventArgs) =
-        lstBox.Items.Clear()
-        let folderBrowser = new FolderBrowserDialog()
-        let browserResult = folderBrowser.ShowDialog()
-        let browserMatch = 
-            if browserResult = DialogResult.OK then 
-                tbtBox.Text <- folderBrowser.SelectedPath
-                let found_files_dir = new DirectoryInfo(tbtBox.Text)
-                let found_files = found_files_dir.GetFiles()
-                //Directory.GetFiles(tbtBox.Text)
-                
-                for i in found_files do
-                    lstBox.Items.Add(i) |>ignore
-
-        lstBox.SelectedItem <- 0
-
-       
 let numberCheck = System.Text.RegularExpressions.Regex("^[0-9]+$")    
 let strContainsOnlyNumbers (s:string) = numberCheck.IsMatch s
+let swap (a: _[]) x y =
+    let tmp = a.[x]
+    a.[x] <- a.[y]
+    a.[y] <- tmp
 
-let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: TextBox) rnd = 
-    let timer = new Timer()
-    timer.Start()
-    timer.Stop()
-    let rnd = System.Random(timer.Interval)
-    if strContainsOnlyNumbers(size.Text) = true then
-        let sizeInt = System.Int32.Parse(size.Text)
-        if sizeInt <= lstBox.Items.Count then
-            List.init sizeInt (fun _ -> rnd.Next(0,10))
-        else
-            List.init lstBox.Items.Count (fun _ -> rnd.Next(0,10))
+//let swap i j =
+//        let temp = array.[i]
+//        array.[i] <- array.[j]
+//        array.[j] <- temp
+//let Shuffle2 arr : (FileInfo[] -> string[]) = 
+    
+
+let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String) = //,  [<Out>] listOfRandomNumbers : list<int32> byref) = 
+    lstBox.Items.Clear()
+    // setting up "random"
+    stopWatch.Stop()
+    let stopwatchElapsedTime = stopWatch.ElapsedMilliseconds.ToString()
+    stopWatch.Reset()
+    stopWatch.Start()
+    let rnd = System.Random(System.Int32.Parse(stopwatchElapsedTime))
+    let shuffle a = Array.iteri ( fun i _ -> swap a i (rnd.Next(i, Array.length a)) ) a
+    
+    match strContainsOnlyNumbers(size) with 
+    | true -> 
+              let sizeInt = System.Int32.Parse(size)
+              let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
+              let found_files = found_files_dir.GetFiles() 
+              //let f = Array.iter(fun _ -> ) found_files
+              shuffle(found_files)
+              //let Shuffle2 = found_files |> Seq.toArray()
+              for i in found_files do
+                  lstBox.Items.Add(i) |>ignore
+                  spoopyGhostMediaList.Add(i) |>ignore
+              
+    | false -> MessageBox.Show("List Size is Invalid") |> ignore        
+    lstBox.SelectedItem <- 0
+    
+
+    //fun (combos : string list) -> List.nth combos (rnd.Next(combos.Length))
+
+    //if strContainsOnlyNumbers(size.Text) = true then
+    //   let sizeInt = System.Int32.Parse(size.Text)
+    //   if sizeInt <= lstBox.Items.Count then
+    //       listOfRandomNumbers = List.init sizeInt (fun _ -> rnd.Next(0,10))
+    //   else
+    //       listOfRandomNumbers = List.init lstBox.Items.Count (fun _ -> rnd.Next(0,10))
+    //ignore
+
+
+
+let directoryButton_Click (tbxDirectory : TextBox, lstBox: ListBox, size: String, e : EventArgs) =
+        let folderBrowser = new FolderBrowserDialog()
+        let browserResult = folderBrowser.ShowDialog()
+        if browserResult = DialogResult.OK then 
+                tbxDirectory.Text <- folderBrowser.SelectedPath
+                let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
+                let found_files = found_files_dir.GetFiles()
+                //Directory.GetFiles(tbtBox.Text)
+                //let mutable randomIndices = new list<int32>
+                Randomizer(tbxDirectory, lstBox, size) //, &randomIndices)
+        //        for i in found_files do
+        //            lstBox.Items.Add(i) |>ignore
+        //lstBox.SelectedItem <- 0
 
 let randomizeButton_Click(tbxDirectory : TextBox, lstBox: ListBox, size: TextBox, e : EventArgs) =
-      ignore()
-      //let randomNumbers = Randomizer(tbxDirectory,lstBox,size)
+      Randomizer(tbxDirectory, lstBox, size.Text)
       
 
-let playButton_Click (sender : TextBox, e : EventArgs) = 
-    let dir = new DirectoryInfo(sender.Text)//new DirectoryInfo(@"D:\\Sammy\\anime\\Last week - watched\\Dragon Ball Super")
-    if not(String.IsNullOrEmpty(dir.FullName)) then
-        let files1 = 
-            Directory.GetFiles(dir.FullName)
-            |>Array.map(fun s -> "\"\"\"" + s)
-            |>Array.map(fun s -> s + "\"\"\"")
-        let filesFinal = """/play /add """ + String.Join( " ", files1)
+
+
+let playButton_Click (lstBox: ListBox, e : EventArgs) = 
+    if not(lstBox.Items.Count = 0) then
+        let arr : obj[] = Array.empty
+        //lstBox.Items.CopyTo(arr,0)
+        //lstBox.Items
+        //Array.init 100 (fun x -> {value1 = "x"; value2 = "y"})
+        //let arr = Seq.init lstBox.Items.Count (fun _ -> "")
+        let arr = new ArrayList(lstBox.Items)
+        //let mutable seeeq = Seq.empty
+        //let mutable counter = 0
+        //let mutable arr = arrrrr
+        
+        //for i in  0..arr.Count do
+        //   lstBox.SelectedIndex <- i
+        //   seeeq <- Seq.append(arr.[i])
+           
+
+           //arr <- Set.map(lstBox.SelectedItem.ToString())
+
+         //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
+        //let a = Array.ConvertAll(found_files, Converter(string) )
+        let f = spoopyGhostMediaList.ToArray()
+        let arr = seq { for i in spoopyGhostMediaList -> i}
+        //let b = Array.ConvertAll(f, Converter(FileInfo(f) ))
+        //let files1 = 
+        //    Seq.toArray(arr)
+        //    |>Array.map(fun s -> "\"\"\"" + (s.FullName) )
+        //    |>Array.map(fun s -> s + "\"\"\"")
+        let files1 = f
+        let files2 = files1 |> Seq.map(fun s -> "\"\"\"" + s)
+        let files3 = files2 |> Seq.map(fun s -> s + "\"\"\"")
+
+        let filesFinal = """/play /add """ + String.Join( " ", files3)
         System.Diagnostics.Process.Start("""C:\Program Files\MPC-HC\mpc-hc64.exe""", filesFinal) |> ignore // D:\Sammy\musica\\")
-
-
-
-//let debug_cursorLocation_Click(sender : Point) = 
-//        Console.Clear()
-//        Console.Write("Cursor Location: " + sender.X.ToString() + ", " + sender.Y.ToString())
 
 
 
@@ -142,16 +200,14 @@ let main (argv :string[]) =
 
     let mediaList = new ListBox()
 
-    //form.Width <- 1142
-    //form.Height <- 750
-    //form.AutoSize <- false
-    form.AutoScaleDimensions <- new System.Drawing.SizeF(12.0f, 25.0f)
     form.AutoScaleMode <- System.Windows.Forms.AutoScaleMode.Font
-    form.Size <- new System.Drawing.Size(598, 418)
-    form.MinimumSize <- new System.Drawing.Size(598, 418)
+    form.Size <- new System.Drawing.Size(1000, 440)
+    
+    form.MinimumSize <- new System.Drawing.Size(1000, 440)
+    form.MaximumSize <- new System.Drawing.Size(1000, 440)
     form.Name <- "Playlist Randomizer"
     form.Text <- "Playlist Randomizer"
-    
+    form.BackColor <- Color.Red
     // main menu
  
     mainFileExit.Click.AddHandler(new System.EventHandler (fun s e -> mainFileExit_Click(s, e)))
@@ -160,20 +216,19 @@ let main (argv :string[]) =
     form.Menu <- mainMenu
 
     
-     
 
     buttonPanel.Name <- "buttonPanel"
     buttonPanel.TabIndex <- 0
     buttonPanel.Dock <- System.Windows.Forms.DockStyle.Left
-    buttonPanel.Size <- new System.Drawing.Size(520, 726)
-    buttonPanel.Location <- new System.Drawing.Point(12, 12)
-    //buttonPanel.BackColor <- Color.Blue
-    buttonPanel.Width <- form.Width/2 // trying to figure out size
+    buttonPanel.Size <- new System.Drawing.Size(300, 440) // x = 520
+    //buttonPanel.Location <- new System.Drawing.Point(0, 0)
+    buttonPanel.BackColor <- Color.Blue
+    //buttonPanel.Width <- form.Width/2 // trying to figure out size
 
-    listPanel.Dock <- System.Windows.Forms.DockStyle.Fill;
-    listPanel.Location <- new System.Drawing.Point(373, 0);
+    listPanel.Dock <- System.Windows.Forms.DockStyle.Right;
+    //listPanel.Location <- new System.Drawing.Point(100, 0);
     listPanel.Name <- "ListPanel";
-    listPanel.Size <- new System.Drawing.Size(608, 532);
+    listPanel.Size <- new System.Drawing.Size(form.Width-buttonPanel.Width-16, 440);
     listPanel.TabIndex <- 1;
 
     // Directory Textbox
@@ -181,10 +236,12 @@ let main (argv :string[]) =
     tbxDirectory.Name <- "tbxDirectory"
     tbxDirectory.Size <- new System.Drawing.Size(250, 31)
     tbxDirectory.TabIndex <- 0
+    tbxDirectory.Text <- "D:\\Sammy\\anime"
 
     // directory button
-    btnDirectory.Text <- "btnDirectory"
+    btnDirectory.Text <- "Directory"
     btnDirectory.Location <- new System.Drawing.Point(90, 80)
+    tbxDirectory.Name <- "tbxDirectory"
     btnDirectory.Size <- new System.Drawing.Size(120, 30)
     btnDirectory.TabIndex <- 1 //??
     btnDirectory.Click.AddHandler(new System.EventHandler (fun _ e -> directoryButton_Click(tbxDirectory, mediaList, tbxAmount.Text, e))) // change to the real function
@@ -197,7 +254,7 @@ let main (argv :string[]) =
     btnRandomize.Text <- "Randomize"
     btnRandomize.UseVisualStyleBackColor <- true
     btnRandomize.TabIndex <- 2
-    //btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory, tbxAmount, e))) // change to the real function
+    btnRandomize.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory,mediaList, tbxAmount, e))) // change to the real function
 
 
     // Play Button
@@ -207,12 +264,12 @@ let main (argv :string[]) =
     btnPlay.Text <- "Play";
     btnPlay.UseVisualStyleBackColor <- true;
     btnPlay.TabIndex <- 3;
-    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> playButton_Click(tbxDirectory, e))) // change to the real function
+    btnPlay.Click.AddHandler(new System.EventHandler (fun _ e -> playButton_Click(mediaList, e))) // change to the real function
 
     //// debug button
-    //let debugButton = new Button()
-    //debugButton.Text <- "Debug"
-    //debugButton.Click.AddHandler(new System.EventHandler (fun _ _ -> debug_window_size form.Size)) // change to the real function
+    let debugButton = new Button()
+    debugButton.Text <- "Debug"
+    debugButton.Click.AddHandler(new System.EventHandler (fun _ _ -> debug_window_size (form.Size,mediaList))) // change to the real function
 
     //form.KeyPress.AddHandler(new KeyPressEventHandler (fun f e -> debug_window_size_key_press(form.Size, e)))
     //form.KeyDown.AddHandler(new System.Windows.Forms.KeyEventHandler (fun s e -> debug_window_size_key_press(form.Size, e)))
@@ -254,7 +311,7 @@ let main (argv :string[]) =
     buttonPanel.Controls.Add(cbxMusicBox)
     buttonPanel.Controls.Add(lblAmount)
     buttonPanel.Controls.Add(tbxAmount)
-    //buttonPanel.Controls.Add(debugButton)
+    buttonPanel.Controls.Add(debugButton)
 
     buttonPanel.ResumeLayout(false)
     buttonPanel.PerformLayout()
