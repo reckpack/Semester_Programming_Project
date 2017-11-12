@@ -5,18 +5,9 @@ open System.IO
 open System.Diagnostics
 open System.Collections
 
-//open System.Windows.Forms.CheckedListBox
-
-//open System.Windows.Forms.CheckedListBox
-
-//open System.Media
-//open System.Windows.Forms.DataGridViewComboBoxCell
-
 let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-
-// REALLY BAD STUFF BUT I KINDA RUN OUT OF IDEAS SO SUE ME
+// I THINK THIS IS REALLY BAD STUFF BUT I KINDA RUN OUT OF IDEAS SO SUE ME
 let spoopyGhostMediaList = new ArrayList()
-
 
 let debug_window_size_key_press(f : System.Drawing.Size, e : KeyEventArgs) = 
         match e with
@@ -57,8 +48,9 @@ let swap (a: _[]) x y =
 //let Shuffle2 arr : (FileInfo[] -> string[]) = 
     
 
-let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String) = //,  [<Out>] listOfRandomNumbers : list<int32> byref) = 
+let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String, videoBox : CheckBox) = //,  [<Out>] listOfRandomNumbers : list<int32> byref) = 
     lstBox.Items.Clear()
+    spoopyGhostMediaList.Clear()
     // setting up "random"
     stopWatch.Stop()
     let stopwatchElapsedTime = stopWatch.ElapsedMilliseconds.ToString()
@@ -73,29 +65,34 @@ let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String) = //,  [<
               let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
               let found_files = found_files_dir.GetFiles() 
               //let f = Array.iter(fun _ -> ) found_files
-              shuffle(found_files)
-              //let Shuffle2 = found_files |> Seq.toArray()
-              for i in found_files do
-                  lstBox.Items.Add(i) |>ignore
-                  spoopyGhostMediaList.Add(i.FullName) |>ignore
+              match videoBox.Checked with
+              |true ->
+                    let filtered_files = found_files |> Array.filter(fun s -> not(s.Name.Substring(s.Name.Length-3) = "mp3"))
+                    shuffle(filtered_files)
+                    for i in 0..(sizeInt-1) do
+                        lstBox.Items.Add( filtered_files.[i]) |>ignore
+                        spoopyGhostMediaList.Add(filtered_files.[i].FullName) |>ignore
+              |false -> 
+                    let filtered_files = found_files |> Array.filter(fun s -> s.Name.Substring(s.Name.Length-3) = "mp3")
+                    shuffle(filtered_files)
+                    for i in 0..(sizeInt-1) do
+                        lstBox.Items.Add( filtered_files.[i]) |>ignore
+                        spoopyGhostMediaList.Add(filtered_files.[i].FullName) |>ignore
+              //shuffle(found_files)
+              //
+              //
+              //
+              ////let Shuffle2 = found_files |> Seq.toArray()
+              //for i in 0..(sizeInt-1) do
+              //    lstBox.Items.Add( found_files.[i]) |>ignore
+              //    spoopyGhostMediaList.Add(found_files.[i].FullName) |>ignore
+              //found_files.CopyTo(spoopyGhostMediaList,0)
               
     | false -> MessageBox.Show("List Size is Invalid") |> ignore        
     lstBox.SelectedItem <- 0
     
 
-    //fun (combos : string list) -> List.nth combos (rnd.Next(combos.Length))
-
-    //if strContainsOnlyNumbers(size.Text) = true then
-    //   let sizeInt = System.Int32.Parse(size.Text)
-    //   if sizeInt <= lstBox.Items.Count then
-    //       listOfRandomNumbers = List.init sizeInt (fun _ -> rnd.Next(0,10))
-    //   else
-    //       listOfRandomNumbers = List.init lstBox.Items.Count (fun _ -> rnd.Next(0,10))
-    //ignore
-
-
-
-let directoryButton_Click (tbxDirectory : TextBox, lstBox: ListBox, size: String, e : EventArgs) =
+let directoryButton_Click (tbxDirectory : TextBox, lstBox: ListBox, size: String, videoBox : CheckBox, e : EventArgs) =
         let folderBrowser = new FolderBrowserDialog()
         let browserResult = folderBrowser.ShowDialog()
         if browserResult = DialogResult.OK then 
@@ -104,15 +101,16 @@ let directoryButton_Click (tbxDirectory : TextBox, lstBox: ListBox, size: String
                 let found_files = found_files_dir.GetFiles()
                 //Directory.GetFiles(tbtBox.Text)
                 //let mutable randomIndices = new list<int32>
-                Randomizer(tbxDirectory, lstBox, size) //, &randomIndices)
+                Randomizer(tbxDirectory, lstBox, size,videoBox) //, &randomIndices)
         //        for i in found_files do
         //            lstBox.Items.Add(i) |>ignore
         //lstBox.SelectedItem <- 0
 
-let randomizeButton_Click(tbxDirectory : TextBox, lstBox: ListBox, size: TextBox, e : EventArgs) =
-      Randomizer(tbxDirectory, lstBox, size.Text)
+let randomizeButton_Click(tbxDirectory : TextBox, lstBox: ListBox, size: TextBox, videoBox : CheckBox, e : EventArgs) =
+      Randomizer(tbxDirectory, lstBox, size.Text,videoBox)
       
 
+//let checkboxEvent_Click(clicked : CheckBox, other: CheckBox) = 
 
 
 let playButton_Click (lstBox: ListBox, e : EventArgs) = 
@@ -122,7 +120,7 @@ let playButton_Click (lstBox: ListBox, e : EventArgs) =
         //lstBox.Items
         //Array.init 100 (fun x -> {value1 = "x"; value2 = "y"})
         //let arr = Seq.init lstBox.Items.Count (fun _ -> "")
-        let arr = new ArrayList(lstBox.Items)
+        //let arr : List<FileInfo> = [lstBox.Items.]
         //let mutable seeeq = Seq.empty
         //let mutable counter = 0
         //let mutable arr = arrrrr
@@ -132,19 +130,19 @@ let playButton_Click (lstBox: ListBox, e : EventArgs) =
         //   seeeq <- Seq.append(arr.[i])
            
 
-           //arr <- Set.map(lstBox.SelectedItem.ToString())
-
-         //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
+        //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
         //let a = Array.ConvertAll(found_files, Converter(string) )
         //let f = spoopyGhostMediaList
-        let arr = seq { for i in 0..spoopyGhostMediaList.Count -> spoopyGhostMediaList.Item i}
+        //let g = toArray(lstBox.Items)
+        
+        //let arr = seq { for i in 0..spoopyGhostMediaList.Count -> spoopyGhostMediaList.Item i}
         //let files1 = 
         //    Seq.toArray(arr)
         //    |>Array.map(fun s -> "\"\"\"" + (s.FullName) )
         //    |>Array.map(fun s -> s + "\"\"\"")
-        let files1 = arr
-        let files2 = files1 |> Seq.map(fun s -> "\"\"\"" + (s.ToString()))
-        let files3 = files2 |> Seq.map(fun s -> s + "\"\"\"")
+        let files1 = spoopyGhostMediaList.ToArray()
+        let files2 = files1 |> Array.map(fun s -> "\"\"\"" + (s.ToString()))
+        let files3 = files2 |> Array.map(fun s -> s + "\"\"\"")
 
         let filesFinal = """/play /add """ + String.Join( " ", files3)
         System.Diagnostics.Process.Start("""C:\Program Files\MPC-HC\mpc-hc64.exe""", filesFinal) |> ignore // D:\Sammy\musica\\")
@@ -206,7 +204,7 @@ let main (argv :string[]) =
     form.MaximumSize <- new System.Drawing.Size(1000, 440)
     form.Name <- "Playlist Randomizer"
     form.Text <- "Playlist Randomizer"
-    form.BackColor <- Color.Red
+    //form.BackColor <- Color.Red
     // main menu
  
     mainFileExit.Click.AddHandler(new System.EventHandler (fun s e -> mainFileExit_Click(s, e)))
@@ -221,7 +219,7 @@ let main (argv :string[]) =
     buttonPanel.Dock <- System.Windows.Forms.DockStyle.Left
     buttonPanel.Size <- new System.Drawing.Size(300, 440) // x = 520
     //buttonPanel.Location <- new System.Drawing.Point(0, 0)
-    buttonPanel.BackColor <- Color.Blue
+    //buttonPanel.BackColor <- Color.Blue
     //buttonPanel.Width <- form.Width/2 // trying to figure out size
 
     listPanel.Dock <- System.Windows.Forms.DockStyle.Right;
@@ -243,7 +241,7 @@ let main (argv :string[]) =
     tbxDirectory.Name <- "tbxDirectory"
     btnDirectory.Size <- new System.Drawing.Size(120, 30)
     btnDirectory.TabIndex <- 1 //??
-    btnDirectory.Click.AddHandler(new System.EventHandler (fun _ e -> directoryButton_Click(tbxDirectory, mediaList, tbxAmount.Text, e))) // change to the real function
+    btnDirectory.Click.AddHandler(new System.EventHandler (fun _ e -> directoryButton_Click(tbxDirectory, mediaList, tbxAmount.Text,cbxVideoBox, e))) // change to the real function
 
     
     // Randomize
@@ -253,7 +251,7 @@ let main (argv :string[]) =
     btnRandomize.Text <- "Randomize"
     btnRandomize.UseVisualStyleBackColor <- true
     btnRandomize.TabIndex <- 2
-    btnRandomize.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory,mediaList, tbxAmount, e))) // change to the real function
+    btnRandomize.Click.AddHandler(new System.EventHandler (fun _ e -> randomizeButton_Click(tbxDirectory,mediaList, tbxAmount,cbxVideoBox, e))) // change to the real function
 
 
     // Play Button
@@ -280,6 +278,10 @@ let main (argv :string[]) =
     cbxVideoBox.Text <- "Video"
     cbxVideoBox.AutoSize <- true
     cbxVideoBox.TabIndex <- 4
+    cbxVideoBox.Checked <- true
+    cbxVideoBox.Click.Add(fun r1msg->  
+                                    cbxVideoBox.Checked<-true  
+                                    cbxMusicBox.Checked<-false)  
 
     // musicBox check box
     cbxMusicBox.Location <- new System.Drawing.Point(200, 240)
@@ -287,6 +289,9 @@ let main (argv :string[]) =
     cbxMusicBox.Size <- new System.Drawing.Size(100, 30)
     cbxMusicBox.Text <- "Music"
     cbxMusicBox.TabIndex <- 5
+    cbxMusicBox.Click.Add(fun r1msg->  
+                                    cbxMusicBox.Checked<-true  
+                                    cbxVideoBox.Checked<-false)  
 
     // size of list label
     lblAmount.Text <- "Size of List"
