@@ -5,6 +5,9 @@ open System.IO
 open System.Diagnostics
 open System.Collections
 
+// Learn more about F# at http://fsharp.org
+// See the 'F# Tutorial' project for more help.
+
 let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 // I THINK THIS IS REALLY BAD STUFF BUT I KINDA RUN OUT OF IDEAS SO SUE ME
 let spoopyGhostMediaList = new ArrayList()
@@ -16,8 +19,7 @@ let debug_window_size_key_press(f : System.Drawing.Size, e : KeyEventArgs) =
         | _  -> ignore()
 
 
-// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
+
 
 let mainFileExit_Click(sender : System.Object, e : EventArgs) = 
         exit 0 |> ignore
@@ -27,16 +29,14 @@ let debug_window_size(sender : System.Drawing.Size, lstBox : ListBox) =
         Console.Clear()
         Console.WriteLine("Form Width: {0}\nForm Height: {1}",sender.Width, sender.Height)
         Console.WriteLine(lstBox.Items)
-        //for i in lstBox.Items do
-        //   Console.WriteLine(i)
 
-        //match e with
-        //| e when Char.ToLower e.KeyChar = 'q' -> Console.WriteLine("Form Width: {0}\nForm Height: {1}",sender.Width, sender.Height)
-        //| _ -> ignore()
   
 // TODO: not gonna lie, I didnt do these 3
+// taken from here: https://stackoverflow.com/questions/42253284/f-check-if-a-string-contains-only-number
 let numberCheck = System.Text.RegularExpressions.Regex("^[0-9]+$")    
 let strContainsOnlyNumbers (s:string) = numberCheck.IsMatch s
+
+
 let swap (a: _[]) x y =
     let tmp = a.[x]
     a.[x] <- a.[y]
@@ -50,6 +50,7 @@ let swap (a: _[]) x y =
     
 
 let addToList(lstBox : ListBox, toAdd : FileInfo[], size : int) = 
+    // for loops are bad but I am kinda out of ideas
     for i in 0..size do
         lstBox.Items.Add( toAdd.[i]) |>ignore
         spoopyGhostMediaList.Add(toAdd.[i].FullName) |>ignore
@@ -67,139 +68,74 @@ let ShuffleRuffleAndAdd(lstBox: ListBox, sizeInt : int, filtered_files :FileInfo
     shuffle(filtered_files)
 
     // ruffle
-    if sizeInt <= filtered_files.Length then
-        //for i in 0..(sizeInt-1) do
-        // and add
-        addToList(lstBox, filtered_files, sizeInt-1) |>ignore
-
-    else
-        //for i in 0..(filtered_files.Length-1) do
-        // and add
-        addToList(lstBox, filtered_files, filtered_files.Length-1) |>ignore
+    match sizeInt with
+       | sizeInt when sizeInt <= filtered_files.Length -> addToList(lstBox, filtered_files, sizeInt-1)
+       | _ -> addToList(lstBox, filtered_files, filtered_files.Length-1)
 
 
 
 let Randomizer (tbxDirectory : TextBox, lstBox: ListBox, size: String, videoBox : CheckBox) = //,  [<Out>] listOfRandomNumbers : list<int32> byref) = 
     lstBox.Items.Clear()
     spoopyGhostMediaList.Clear()
-    
-    if not(String.IsNullOrEmpty(tbxDirectory.Text)) then
-        match strContainsOnlyNumbers(size) with 
-        | true -> 
-                  let sizeInt = System.Int32.Parse(size)
-                  let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
-                  let found_files = found_files_dir.GetFiles() 
-                  //let f = Array.iter(fun _ -> ) found_files
-                  match videoBox.Checked with
-                  |true ->
-                        // if we want videos
-                        let filtered_files = found_files |> Array.filter(fun s -> not(s.Name.Substring(s.Name.Length-3) = "mp3"))
-                        ShuffleRuffleAndAdd(lstBox,sizeInt,filtered_files)
-                        //if sizeInt <= filtered_files.Length then
-                        //for i in 0..(sizeInt-1) do
-                        //    lstBox.Items.Add( filtered_files.[i]) |>ignore
-                        //    spoopyGhostMediaList.Add(filtered_files.[i].FullName) |>ignore
-                  |false -> 
-                        // if we want music
-                        let filtered_files = found_files |> Array.filter(fun s -> s.Name.Substring(s.Name.Length-3) = "mp3")
-                        ShuffleRuffleAndAdd(lstBox,sizeInt,filtered_files)
-                        //shuffle(filtered_files)
-                        //for i in 0..(sizeInt-1) do
-                        //    lstBox.Items.Add( filtered_files.[i]) |>ignore
-                        //    spoopyGhostMediaList.Add(filtered_files.[i].FullName) |>ignore
-                  //shuffle(found_files)
-                  //
-                  //
-                  //
-                  ////let Shuffle2 = found_files |> Seq.toArray()
-                  //for i in 0..(sizeInt-1) do
-                  //    lstBox.Items.Add( found_files.[i]) |>ignore
-                  //    spoopyGhostMediaList.Add(found_files.[i].FullName) |>ignore
-                  //found_files.CopyTo(spoopyGhostMediaList,0)
-                  
-        | false -> MessageBox.Show("List Size is Invalid") |> ignore        
-        lstBox.SelectedItem <- 0
+    //if not(String.IsNullOrEmpty(tbxDirectory.Text)) then
+    match String.IsNullOrEmpty(tbxDirectory.Text) with 
+    | false ->   
+             match strContainsOnlyNumbers(size) with 
+             | true -> 
+                       let sizeInt = System.Int32.Parse(size)
+                       let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
+                       let found_files = found_files_dir.GetFiles() 
+                       //let f = Array.iter(fun _ -> ) found_files
+                       match videoBox.Checked with
+                       |true ->
+                             // if we want videos
+                             let filtered_files = 
+                                found_files 
+                                |> Array.filter(fun s -> 
+                                                let strEnd = (String.length s.Name) - 3
+                                                not(s.Name.Substring strEnd = "mp3"))
+                             ShuffleRuffleAndAdd(lstBox,sizeInt,filtered_files)
+                        |false -> 
+                             // if we want music
+                             let filtered_files = 
+                                found_files 
+                                |> Array.filter(fun s ->
+                                                let strEnd = (String.length s.Name) - 3
+                                                s.Name.Substring strEnd = "mp3")
+                             ShuffleRuffleAndAdd(lstBox,sizeInt,filtered_files)
+             | false -> MessageBox.Show("List Size is Invalid") |> ignore    
+    | true -> ignore()
+    lstBox.SelectedItem <- 0
     
 
 let directoryButton_Click (tbxDirectory : TextBox, lstBox: ListBox, size: String, videoBox : CheckBox, e : EventArgs) =
         let folderBrowser = new FolderBrowserDialog()
         let browserResult = folderBrowser.ShowDialog()
-        if browserResult = DialogResult.OK then 
-                tbxDirectory.Text <- folderBrowser.SelectedPath
-                let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
-                let found_files = found_files_dir.GetFiles()
-                //Directory.GetFiles(tbtBox.Text)
-                //let mutable randomIndices = new list<int32>
-                Randomizer(tbxDirectory, lstBox, size,videoBox) //, &randomIndices)
-        //        for i in found_files do
-        //            lstBox.Items.Add(i) |>ignore
-        //lstBox.SelectedItem <- 0
+        //if browserResult = DialogResult.OK then 
+        match browserResult with
+        | DialogResult.OK ->
+                                tbxDirectory.Text <- folderBrowser.SelectedPath
+                                //let found_files_dir = new DirectoryInfo(tbxDirectory.Text)
+                                //let found_files = found_files_dir.GetFiles()
+                                Randomizer(tbxDirectory, lstBox, size,videoBox) //, &randomIndices)
+        | _ -> ignore() 
 
 let randomizeButton_Click(tbxDirectory : TextBox, lstBox: ListBox, size: TextBox, videoBox : CheckBox, e : EventArgs) =
       Randomizer(tbxDirectory, lstBox, size.Text,videoBox)
       
-
-//let checkboxEvent_Click(clicked : CheckBox, other: CheckBox) = 
-
-
+      
 let playButton_Click (lstBox: ListBox, e : EventArgs) = 
-    if not(lstBox.Items.Count = 0) then
-        let arr : obj[] = Array.empty
-        //lstBox.Items.CopyTo(arr,0)
-        //lstBox.Items
-        //Array.init 100 (fun x -> {value1 = "x"; value2 = "y"})
-        //let arr = Seq.init lstBox.Items.Count (fun _ -> "")
-        //let arr : List<FileInfo> = [lstBox.Items.]
-        //let mutable seeeq = Seq.empty
-        //let mutable counter = 0
-        //let mutable arr = arrrrr
-        
-        //for i in  0..arr.Count do
-        //   lstBox.SelectedIndex <- i
-        //   seeeq <- Seq.append(arr.[i])
-           
+    match lstBox.Items.Count with
+    | 0 -> ignore() // no files detected
+    | _ ->
+            let files = 
+                spoopyGhostMediaList.ToArray()
+                |> Array.map(fun s -> "\"\"\"" + (s.ToString())) // add " at the beggining of every file name
+                |> Array.map(fun s -> s + "\"\"\"") // add " at the end of every file name
 
-        //   arr.[myIter] <- lstBox.Items.Item.[myIter].ToString()//[myIter]
-        //let a = Array.ConvertAll(found_files, Converter(string) )
-        //let f = spoopyGhostMediaList
-        //let g = toArray(lstBox.Items)
-        
-        //let arr = seq { for i in 0..spoopyGhostMediaList.Count -> spoopyGhostMediaList.Item i}
-        //let files1 = 
-        //    Seq.toArray(arr)
-        //    |>Array.map(fun s -> "\"\"\"" + (s.FullName) )
-        //    |>Array.map(fun s -> s + "\"\"\"")
-        let files1 = spoopyGhostMediaList.ToArray()
-        let files2 = files1 |> Array.map(fun s -> "\"\"\"" + (s.ToString()))
-        let files3 = files2 |> Array.map(fun s -> s + "\"\"\"")
-
-        let filesFinal = """/play /add """ + String.Join( " ", files3)
-        System.Diagnostics.Process.Start("""C:\Program Files\MPC-HC\mpc-hc64.exe""", filesFinal) |> ignore // D:\Sammy\musica\\")
-
-
-
-//let makeVideoPlaylistFile() = 
-//    let currentDir = Directory.GetCurrentDirectory()
-//    File.Create(currentDir + "video_playlist.mpcpl")
-
-
-//let initVideoPlaylist(video : String[]) = 
-//    let currentDir = Directory.GetCurrentDirectory()
-//    let playlist_exists = System.IO.File.Exists(currentDir + "\\video_playlist.mpcpl")
-//
-//    if not(playlist_exists) then
-//        use playlist = new StreamWriter(currentDir + "\\video_playlist.mpcpl")
-//        let mutable count = 0
-//        playlist.Write("MPCPLAYLIST")
-//        for i in video do
-//            playlist.Write(count.ToString() + ",type, 0")
-//            playlist.Write(count.ToString() + ",filename," + i)
-//        playlist.Close()    
-        
-
-    
-
-
+            let filesFinal = """/play /add """ + String.Join( " ", files)
+            System.Diagnostics.Process.Start("""C:\Program Files\MPC-HC\mpc-hc64.exe""", filesFinal) |> ignore // D:\Sammy\musica\\")
+   
 
 [<EntryPoint>][<STAThread>]
 let main (argv :string[]) = 
@@ -234,8 +170,8 @@ let main (argv :string[]) =
     form.Name <- "Playlist Randomizer"
     form.Text <- "Playlist Randomizer"
     //form.BackColor <- Color.Red
+    
     // main menu
- 
     mainFileExit.Click.AddHandler(new System.EventHandler (fun s e -> mainFileExit_Click(s, e)))
     mainFile.MenuItems.AddRange( [| mainFileExit |] )
     mainMenu.MenuItems.AddRange( [| mainFile |] )
@@ -247,12 +183,8 @@ let main (argv :string[]) =
     buttonPanel.TabIndex <- 0
     buttonPanel.Dock <- System.Windows.Forms.DockStyle.Left
     buttonPanel.Size <- new System.Drawing.Size(300, 440) // x = 520
-    //buttonPanel.Location <- new System.Drawing.Point(0, 0)
-    //buttonPanel.BackColor <- Color.Blue
-    //buttonPanel.Width <- form.Width/2 // trying to figure out size
 
     listPanel.Dock <- System.Windows.Forms.DockStyle.Right;
-    //listPanel.Location <- new System.Drawing.Point(100, 0);
     listPanel.Name <- "ListPanel";
     listPanel.Size <- new System.Drawing.Size(form.Width-buttonPanel.Width-16, 440);
     listPanel.TabIndex <- 1;
@@ -262,7 +194,6 @@ let main (argv :string[]) =
     tbxDirectory.Name <- "tbxDirectory"
     tbxDirectory.Size <- new System.Drawing.Size(250, 31)
     tbxDirectory.TabIndex <- 0
-    //tbxDirectory.Text <- "D:\\Sammy\\anime"
 
     // directory button
     btnDirectory.Text <- "Directory"
@@ -388,50 +319,7 @@ let main (argv :string[]) =
     
     //form.Click.Add( fun s -> debug_cursorLocation_Click(form.Cursor.HotSpot))
 
-
-
     Application.Run(form)
-
-
-    //let addquotes(x : String) = 
-    //    x.Insert(0, "\"\"\"")
-    //    x.Insert(x.Length-1,"\"\"\"")
-   
-    //let files2 = files1 |> Array.map(fun s -> "\"\"\"" + s)
-    //let files3 = files2 |> Array.map(fun s -> s + "\"\"\"")
-                                           
-    //let files2 = 
-    //        Directory.GetFiles(dir.FullName) 
-    //        |>Array.map(fun s -> "\"\"\"" + s)
-    //        |>Array.map(fun s -> s + "\"\"\"")
-            
-        //Array.ForEach(files1, <@ new Action<String>(fun s -> addquotes(s) ) >@ ) //(fun s -> s.Insert(0,""" """))
-    
-    //let filesFinal = """/play /add """ + String.Join( " ", files3)
-
-    //let p = Path.Combine(song1)
-
-
-    //initVideoPlaylist(files1)
-
-    //let playlistDirectory = Directory.GetCurrentDirectory() + "\\video_playlist.mpcpl"
-    //let fdvs = playlistDirectory.
-
-
-    //let final = System.IO.File.Exists("D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\video_playlist.mpcpl")
-
-    //let f = """ /add /play "D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\video_playlist.mpcpl" """
-
-    //let g  = """/play /add""" + f
-
-    //let a = System.Diagnostics.Process.Start("mpc-hc64.exe", "/play \"" +  + "\"")
-
-    //wmplayer.exe
-    //"D:\Sammy\musica\para auto\Hamilton\20 - Hamilton - Yorktown (The World Turned Upside Down).mp3" + 
-    //", D:\Sammy\musica\para auto\Homestuck\Homestuck - Homestuck Vol. 1-4 - 05 Sburban Countdown.mp3" + 
-    //", D:\Sammy\musica\para auto\Old\4chan_city_Craptastrophe.mp3")
-
- 
     0 
 
 

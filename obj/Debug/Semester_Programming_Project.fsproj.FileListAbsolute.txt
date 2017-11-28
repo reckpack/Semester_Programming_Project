@@ -1,4 +1,3 @@
-D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\obj\Debug\Semester_Programming_Project.fsproj.CoreCompileInputs.cache
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\Semester_Programming_Project.exe.config
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\Semester_Programming_Project.XML
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\Semester_Programming_Project.exe
@@ -6,5 +5,6 @@ D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Progra
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\FSharp.Core.dll
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\System.ValueTuple.dll
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\bin\Debug\FSharp.Core.xml
+D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\obj\Debug\Semester_Programming_Project.fsproj.CoreCompileInputs.cache
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\obj\Debug\Semester_Programming_Project.exe
 D:\Sammy\Classes\2017\Fall\Organization of Programming Languages\Semester_Programming_Project\Semester_Programming_Project\obj\Debug\Semester_Programming_Project.pdb
